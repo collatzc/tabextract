@@ -69,6 +69,25 @@ func Open(filename string) (Source, error) {
 	return nil, ErrUnknownFormat
 }
 
+func ColAtoi(col string) (int, error) {
+	if col == "" {
+		return 0, errors.New("empty column name")
+	}
+
+	var r int
+	for i, char := range col {
+		if 'A' <= char && char <= 'Z' {
+			r += (int(char) - runeOffsetUpper) * pow26(len(col)-i-1)
+		} else if 'a' <= char && char <= 'z' {
+			r += (int(char) - runeOffsetLower) * pow26((len(col) - i - 1))
+		} else {
+			return 0, errors.New("invalid column name")
+		}
+	}
+
+	return r - 1, nil
+}
+
 type srcOpenTab struct {
 	name string
 	pri  int
@@ -87,7 +106,18 @@ func Register(name string, priority int, opener OpenFunc) error {
 	return nil
 }
 
+var pow26tab = [...]int{1, 26, 676, 17576, 456976, 11881376}
+
+func pow26(n int) int {
+	if 0 <= n && n <= 5 {
+		return pow26tab[n]
+	}
+	return pow26(n-1) * 26
+}
+
 const (
+	runeOffsetUpper      = 64
+	runeOffsetLower      = 96
 	ContinueColumnMerged = "→"
 	EndColumnMerged      = "⇥"
 	ContinueRowMerged    = "↓"
