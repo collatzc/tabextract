@@ -11,14 +11,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-	"io/ioutil"
 	"log"
 	"unicode/utf16"
 
 	tabextract "github.com/collatzc/tabextract"
 )
 
-const fullAssertions = true
+const fullAssertions = false
 
 const (
 	secFree       uint32 = 0xFFFFFFFF // FREESECT
@@ -104,7 +103,7 @@ type Document struct {
 
 func (d *Document) load(rx io.ReadSeeker) error {
 	var err error
-	d.data, err = ioutil.ReadAll(rx)
+	d.data, err = io.ReadAll(rx)
 	if err != nil {
 		return err
 	}
@@ -112,15 +111,18 @@ func (d *Document) load(rx io.ReadSeeker) error {
 
 	h := &header{}
 	err = binary.Read(br, binary.LittleEndian, h)
-	if h.Signature != 0xe11ab1a1e011cfd0 {
-		return tabextract.ErrNotInFormat // errors.New("ole2: invalid format")
+	if err != nil {
+		return err
 	}
-	if h.ByteOrder != 0xFFFE {
-		return tabextract.ErrNotInFormat //errors.New("ole2: invalid format")
+	if h.Signature != 0xe11ab1a1e011cfd0 {
+		return tabextract.ErrNotInFormat
+	}
+	if h.ByteOrder != 0xfffe {
+		return tabextract.ErrNotInFormat
 	}
 	if fullAssertions {
 		if h.ClassID[0] != 0 || h.ClassID[1] != 0 {
-			return tabextract.ErrNotInFormat //errors.New("ole2: invalid CLSID")
+			return tabextract.ErrNotInFormat
 		}
 		if h.MajorVersion != 3 && h.MajorVersion != 4 {
 			return errors.New("ole2: unknown major version")

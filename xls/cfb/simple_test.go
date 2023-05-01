@@ -2,7 +2,6 @@ package cfb
 
 import (
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -49,7 +48,7 @@ func TestHeader4(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	book, err := ioutil.ReadAll(r)
+	book, err := io.ReadAll(r)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +58,7 @@ func TestHeader4(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		t.Fatal(err)
 	}
